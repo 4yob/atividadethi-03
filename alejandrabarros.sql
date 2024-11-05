@@ -13,15 +13,15 @@ CREATE TABLE hospedes (
 CREATE TABLE quartos (
     id_quarto SERIAL PRIMARY KEY,
     numero INT NOT NULL,
-    andar NOT NULL
+    andar INT NOT NULL
 );
 
 CREATE TABLE reservas (
     id_reserva SERIAL PRIMARY KEY,
     id_hospede INT NOT NULL,
     id_quarto INT NOT NULL,
-    data_checkin DATE NOT NULL,
-    data_checkout DATE NOT NULL,
+    data_checkin DATE,
+    data_checkout DATE,
     CONSTRAINT fk_hospede FOREIGN KEY (id_hospede) REFERENCES hospedes(id_hospede),
     CONSTRAINT fk_quarto FOREIGN KEY (id_quarto) REFERENCES quartos(id_quarto)
 );
@@ -41,9 +41,12 @@ INSERT INTO quartos (numero, andar) VALUES (51, 4),
 (44, 3),
 (45, 3),
 (32, 2),
-(36, 2);
+(36, 2),
+(55, 4),
+(63, 5),
+(82, 7);
 
-INSERT INTO reservas (id_hospede, id_quarto, data_entrada, data_saida, ) VALUES (1, 7, '15-01-2023', '20-01-2023'),
+INSERT INTO reservas (id_hospede, id_quarto, data_checkin, data_checkout) VALUES (1, 7, '15-01-2023', '20-01-2023'),
 (7, 1, '25-12-2024', '30-12-2024'),
 (2, 6, '07-06-2022', '07-07-2022'),
 (6, 2, '13-03-2024', '14-03-2024'),
@@ -51,3 +54,50 @@ INSERT INTO reservas (id_hospede, id_quarto, data_entrada, data_saida, ) VALUES 
 (5, 3, '22-10-2024', '26-10-2024'),
 (4, 4, '30-09-2024', '22-11-2024');
 
+
+/*SELECT de todos os hóspedes*/
+SELECT
+    r.id_reserva,
+    h.nome AS hospede,
+    h.cpf,
+    q.numero AS numero_quarto,
+    q.andar AS andar_quarto,
+    r.data_checkin,
+    r.data_checkout
+FROM
+    reservas r
+JOIN
+    hospedes h ON r.id_hospede = h.id_hospede
+JOIN
+    quartos q ON r.id_quarto = q.id_quarto;
+
+
+/*SELECT dos hóspedes que já finalizaram a estadia*/
+SELECT
+    r.id_reserva,
+    h.nome AS hospede,
+    h.cpf,
+    q.numero AS numero_quarto,
+    q.andar AS andar_quarto,
+    r.data_checkin,
+    r.data_checkout
+FROM
+    reservas r
+JOIN
+    hospedes h ON r.id_hospede = h.id_hospede
+JOIN
+    quartos q ON r.id_quarto = q.id_quarto
+WHERE
+    r.data_checkout < CURRENT_DATE;
+
+
+/*SELECT de quartos não ocupados*/
+SELECT
+    q.numero AS numero_quarto,
+    q.andar AS andar_quarto
+FROM
+    quartos q
+LEFT JOIN
+    reservas r ON q.id_quarto = r.id_quarto
+WHERE
+    r.id_quarto IS NULL;
